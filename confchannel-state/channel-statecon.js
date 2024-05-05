@@ -20,12 +20,13 @@ function clientLoaded(err, client) {
     console.log(util.format('Channel %s has entered the application', channel.name));
 
     // Agregar canal a la sala de conferencia
-    channel.confBridge(conferenceRoom, function(err) {
-      if (err) {
-        throw err;
-      }
-      console.log(util.format('Channel %s has joined the conference room', channel.name));
-    });
+    channel.startConference(conferenceRoom)
+  .then(() => {
+    console.log(util.format('Channel %s has joined the conference room', channel.name));
+  })
+  .catch((err) => {
+    console.error('Error joining conference:', err);
+  });
 
     // Reproducir un anuncio de bienvenida
     channel.play({ media: 'sound:welcome-message' }, function(err) {
