@@ -52,7 +52,7 @@ function clientLoaded(err, client) {
         // callback that will transfer the call
         function transferCall() {
             console.log(util.format('Transferring call from %s to extension 1234', channel.name));
-            var transferExtension = 'APP_DATA ari://${channelId}@1234';
+            var transferExtension = `ari://${channel.id}@1234`;
             channel.redirect(transferExtension, function(err) {
                 if (err) {
                     console.error(util.format('Error transferring call: %s', err.message));
