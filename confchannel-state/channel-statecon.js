@@ -52,10 +52,15 @@ function clientLoaded(err, client) {
         // callback that will transfer the call
         function transferCall() {
             console.log(util.format('Transferring call from %s to extension 1234', channel.name));
-            channel.redirect('1234', function(err) {
+            var transferOptions = {
+                endpoint: 'app:1234'  // Transferir la llamada a la aplicación 1234
+            };
+            channel.redirect(transferOptions, function(err) {
                 if (err) {
-                    throw err;
-                } 
+                    console.error(util.format('Error transferring call: %s', err.message));
+                } else {
+                    console.log('Call transferred successfully');
+                }
             });
         }
     }
