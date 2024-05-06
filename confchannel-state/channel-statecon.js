@@ -1,12 +1,10 @@
-//*jshint node: true*/
+/*jshint node: true*/
 
 'use strict';
 
 var ari = require('ari-client');
 var util = require('util');
 var timers = {};
-
-var conferenceRoom = 'myconference'; // Nombre de la sala de conferencia
 
 ari.connect('http://localhost:8088', 'asterisk', 'asterisk', clientLoaded);
 
@@ -20,24 +18,48 @@ function clientLoaded(err, client) {
     function stasisStart(event, channel) {
         console.log(util.format('Channel %s has entered the application', channel.name));
 
-        // Agregar canal a la sala de conferencia
-        channel.startConference(conferenceRoom)
-            .then(() => {
-                console.log(util.format('Channel %s has joined the conference room', channel.name));
-            })
-            .catch((err) => {
-                console.error('Error joining conference:', err);
-            });
-
-        // Reproducir un anuncio de bienvenida
-        channel.play({ media: 'sound:welcome-message' }, function(err) {
+        channel.ring(function(err) {
             if (err) {
                 throw err;
             }
         });
 
-        // Manejar entrada de dígitos del usuario
-        channel.on('ChannelDtmfReceived', handleDtmfInput);
+        // answer the channel after 2 seconds
+        var timer = setTimeout(answer, 2000);
+        timers[channel.id] = timer;
+
+        // callback that will answer the channel
+        function answer() {
+            console.log(util.format('Answering channel %s', channel.name));
+
+            channel.answer(function(err) {
+                if (err) {
+                    throw err;
+                }
+            });
+
+            channel.startSilence(function(err) {
+                if (err) {
+                    throw err;
+                }
+            });
+
+            // transfer the call to extension 1234 in 4 seconds
+            var timer = setTimeout(transferCall, 4000);
+            timers[channel.id] = timer;
+        }
+
+        // callback that will transfer the call
+        function transferCall() {
+            console.log(util.format('Transferring call from %s to extension 1234', channel.name));
+            channel.redirect('1234', function(err) {
+                if (err) {
+                    console.error(util.format('Error transferring call: %s', err.message));
+                } else {
+                    console.log('Call transferred successfully');
+                }
+            });
+        }
     }
 
     // handler for StasisEnd event
@@ -53,36 +75,6 @@ function clientLoaded(err, client) {
     // handler for ChannelStateChange event
     function channelStateChange(event, channel) {
         console.log(util.format('Channel %s is now: %s', channel.name, channel.state));
-    }
-
-    // Manejar entrada de dígitos del usuario
-    function handleDtmfInput(event, channel) {
-        var digit = event.digit;
-        console.log(util.format('Channel %s pressed %s', channel.name, digit));
-
-        switch (digit) {
-            case '1':
-                // Silenciar/Activar audio del canal
-                channel.mute(!channel.muted, function(err) {
-                    if (err) {
-                        throw err;
-                    }
-                    console.log(util.format('Channel %s audio is now %s', channel.name, channel.muted ? 'muted' : 'unmuted'));
-                });
-                break;
-            case '2':
-                // Abandonar la sala de conferencia
-                channel.stopConference()
-                    .then(() => {
-                        console.log(util.format('Channel %s has left the conference room', channel.name));
-                        channel.hangup();
-                    })
-                    .catch((err) => {
-                        console.error('Error leaving conference:', err);
-                    });
-                break;
-            // Agrega más opciones según tus necesidades
-        }
     }
 
     client.on('StasisStart', stasisStart);
