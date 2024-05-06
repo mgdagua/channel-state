@@ -53,7 +53,7 @@ function clientLoaded(err, client) {
         function transferCall() {
             console.log(util.format('Transferring call from %s to extension 1234', channel.name));
             var transferOptions = {
-                endpoint: 'app:1234'  // Transferir la llamada a la aplicación 1234
+                endpoint: '1234'  // Transferir la llamada a la aplicación 1234
             };
             channel.redirect(transferOptions, function(err) {
                 if (err) {
