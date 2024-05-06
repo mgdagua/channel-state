@@ -54,10 +54,8 @@ function clientLoaded(err, client) {
             console.log(util.format('Transferring call from %s to extension 1234', channel.name));
             channel.redirect('1234', function(err) {
                 if (err) {
-                    console.error(util.format('Error transferring call: %s', err.message));
-                } else {
-                    console.log('Call transferred successfully');
-                }
+                    throw err;
+                } 
             });
         }
     }
