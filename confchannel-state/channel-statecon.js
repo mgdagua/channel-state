@@ -52,26 +52,14 @@ function clientLoaded(err, client) {
         // callback that will transfer the call
         function transferCall() {
             console.log(util.format('Transferring call from %s to extension 1234', channel.name));
-
             var transferOptions = {
-                endpoint: 'SIP/1234' // Transferir la llamada a la aplicación 1234
+                endpoint: '1234'  // Transferir la llamada a la aplicación 1234
             };
-
-            channel.redirect(transferOptions, function(err, newChannel) {
+            channel.redirect(transferOptions, function(err) {
                 if (err) {
                     console.error(util.format('Error transferring call: %s', err.message));
                 } else {
                     console.log('Call transferred successfully');
-                    console.log(util.format('Cambio de canal en estado: %s', channel.name));
-
-                    // Colgar (hang up) el canal original después de la transferencia
-                    channel.hangup(function(err) {
-                        if (err) {
-                            console.error(util.format('Error hanging up channel: %s', err.message));
-                        } else {
-                            console.log(util.format('Channel %s has been hung up', channel.name));
-                        }
-                    });
                 }
             });
         }
@@ -95,5 +83,6 @@ function clientLoaded(err, client) {
     client.on('StasisStart', stasisStart);
     client.on('StasisEnd', stasisEnd);
     client.on('ChannelStateChange', channelStateChange);
+
     client.start('channel-state');
 }
